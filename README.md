@@ -10,9 +10,10 @@ its own access-token login; no separate AI API key is required.
 
 ## Screenshots
 
-Actual app captures from a public demo conversation, using a phone-sized browser and
-an iPhone simulator. The demo opens a public page, runs browser tools, renders an
-interactive HTML diagram, and accepts a queued message through **Steer instead**.
+Actual app-only captures from a public demo conversation, using a phone-sized browser.
+Device status bars and browser address bars are omitted. The demo opens a public page,
+runs browser tools, renders an interactive HTML diagram, and accepts a queued message
+through **Steer instead**.
 Click any image to view it at full size.
 
 <table>
@@ -22,9 +23,9 @@ Click any image to view it at full size.
     <th>Visual source</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/code-response.png"><img src="docs/screenshots/code-response.png" width="240" alt="TypeScript response in a compact D2Coding code block above an interactive diagram"></a></td>
-    <td><a href="docs/screenshots/visual-preview.png"><img src="docs/screenshots/visual-preview.png" width="240" alt="HTML workflow diagram with Browse highlighted after tapping its next-step button"></a></td>
-    <td><a href="docs/screenshots/visual-source.png"><img src="docs/screenshots/visual-source.png" width="240" alt="HTML visual switched to its source with a Preview button"></a></td>
+    <td><a href="docs/screenshots/code-response.jpg"><img src="docs/screenshots/code-response.jpg" width="240" alt="TypeScript response in a compact D2Coding code block above an interactive diagram"></a></td>
+    <td><a href="docs/screenshots/visual-preview.jpg"><img src="docs/screenshots/visual-preview.jpg" width="240" alt="HTML workflow diagram with Browse highlighted after tapping its next-step button"></a></td>
+    <td><a href="docs/screenshots/visual-source.jpg"><img src="docs/screenshots/visual-source.jpg" width="240" alt="HTML visual switched to its source with a Preview button"></a></td>
   </tr>
   <tr>
     <th>Tool activity</th>
@@ -32,7 +33,7 @@ Click any image to view it at full size.
     <th>Edit a queued message</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/tool-activity.png"><img src="docs/screenshots/tool-activity.png" width="240" alt="Expanded browser actions showing completed steps and technical details"></a></td>
+    <td><a href="docs/screenshots/tool-activity.jpg"><img src="docs/screenshots/tool-activity.jpg" width="240" alt="Expanded browser actions showing completed steps and technical details"></a></td>
     <td><a href="docs/screenshots/queue-steering.jpg"><img src="docs/screenshots/queue-steering.jpg" width="240" alt="Queued message menu with Edit message, Steer instead, and Cancel message"></a></td>
     <td><a href="docs/screenshots/queue-edit.jpg"><img src="docs/screenshots/queue-edit.jpg" width="240" alt="Queued message being edited inline with Cancel and Save controls"></a></td>
   </tr>
@@ -42,9 +43,9 @@ Click any image to view it at full size.
     <th>Model picker</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/conversation-drawer.png"><img src="docs/screenshots/conversation-drawer.png" width="240" alt="Drawer searching for the pinned public README demo conversation"></a></td>
-    <td><a href="docs/screenshots/conversation-menu.png"><img src="docs/screenshots/conversation-menu.png" width="240" alt="Conversation menu with pin, rename, share, copy link, and copy session ID"></a></td>
-    <td><a href="docs/screenshots/model-picker.png"><img src="docs/screenshots/model-picker.png" width="240" alt="Model selection sheet with providers and reasoning effort"></a></td>
+    <td><a href="docs/screenshots/conversation-drawer.jpg"><img src="docs/screenshots/conversation-drawer.jpg" width="240" alt="Drawer searching for the public README demo conversation"></a></td>
+    <td><a href="docs/screenshots/conversation-menu.jpg"><img src="docs/screenshots/conversation-menu.jpg" width="240" alt="Conversation menu with pin, rename, share, copy link, and copy session ID"></a></td>
+    <td><a href="docs/screenshots/model-picker.jpg"><img src="docs/screenshots/model-picker.jpg" width="240" alt="Model selection sheet with providers and reasoning effort"></a></td>
   </tr>
   <tr>
     <th>Browser picture-in-picture</th>
@@ -52,9 +53,9 @@ Click any image to view it at full size.
     <th>Connection and notifications</th>
   </tr>
   <tr>
-    <td><a href="docs/screenshots/browser-pip.png"><img src="docs/screenshots/browser-pip.png" width="240" alt="Live browser preview at the upper right of the conversation"></a></td>
-    <td><a href="docs/screenshots/browser-sheet.png"><img src="docs/screenshots/browser-sheet.png" width="240" alt="Browser sheet showing the page title, URL, preview, and Open in your browser action"></a></td>
-    <td><a href="docs/screenshots/settings.png"><img src="docs/screenshots/settings.png" width="240" alt="Settings showing bridge and browser connection status and Home Screen notification guidance"></a></td>
+    <td><a href="docs/screenshots/browser-pip.jpg"><img src="docs/screenshots/browser-pip.jpg" width="240" alt="Live browser preview beside completed browser actions"></a></td>
+    <td><a href="docs/screenshots/browser-sheet.jpg"><img src="docs/screenshots/browser-sheet.jpg" width="240" alt="Browser sheet showing the page title, URL, preview, and Open in your browser action"></a></td>
+    <td><a href="docs/screenshots/settings.jpg"><img src="docs/screenshots/settings.jpg" width="240" alt="Settings showing bridge and browser connection status and response notification controls"></a></td>
   </tr>
 </table>
 
