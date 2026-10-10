@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import type { QueuedMessage, UseChat } from './types';
 import { tokens } from './tokens.stylex';
 import { ICON_STROKE } from './ui';
+import { Button } from './Button';
 
 const MENU_MARGIN = 8;
 const MENU_WIDTH = 268;
@@ -84,7 +85,7 @@ export function QueuedBubble({ message, index, chat, isEditing, isAnotherEditing
     </div>
     <div {...stylex.props(styles.bubble, isEditing && styles.editBubble)}>
       {message.attachments.length > 0 && <div {...stylex.props(styles.attachments)}>{message.attachments.map(attachment => <img key={attachment.id} src={attachment.url} alt={attachment.name} {...stylex.props(styles.image)} />)}</div>}
-      {isEditing ? <><textarea ref={inputRef} aria-label={`Edit ${label.toLowerCase()}`} rows={3} value={editText} disabled={message.status === 'sending'} {...stylex.props(styles.editInput)} onChange={event => onEditTextChange(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); void runAction('cancel'); } }} /><div {...stylex.props(styles.editActions)}><button type="button" disabled={isBusy} {...stylex.props(styles.textButton)} onClick={() => { void runAction('cancel'); }}>Cancel</button><button type="button" disabled={isBusy || (!editText.trim() && !message.attachments.length)} {...stylex.props(styles.textButton, styles.saveButton)} onClick={() => { void runAction('save'); }}>{isActing ? 'Saving…' : 'Save'}</button></div></> : message.prompt}
+      {isEditing ? <><textarea ref={inputRef} aria-label={`Edit ${label.toLowerCase()}`} rows={3} value={editText} disabled={message.status === 'sending'} {...stylex.props(styles.editInput)} onChange={event => onEditTextChange(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); void runAction('cancel'); } }} /><div {...stylex.props(styles.editActions)}><Button size="compact" disabled={isBusy} onClick={() => { void runAction('cancel'); }}>Cancel</Button><Button size="compact" variant="primary" disabled={isBusy || (!editText.trim() && !message.attachments.length)} onClick={() => { void runAction('save'); }}>{isActing ? 'Saving…' : 'Save'}</Button></div></> : message.prompt}
     </div>
     {message.status === 'error' && <p role="alert" {...stylex.props(styles.error)}>{message.error || 'Could not send. Edit or try again.'}</p>}
     <div ref={menuRef} id={menuId} popover="auto" role="menu" aria-label={`Options for ${label.toLowerCase()}`} className={[stylex.props(styles.menu).className, 'queued-message-menu'].join(' ')} onToggle={event => setMenuOpen(event.currentTarget.matches(':popover-open'))} onKeyDown={event => {
@@ -110,8 +111,6 @@ const styles = stylex.create({
   editBubble: { width: 'min(540px, 100%)' },
   editInput: { display: 'block', width: '100%', maxHeight: 160, minHeight: 72, resize: 'none', padding: 0, borderWidth: 0, color: tokens.text, backgroundColor: 'transparent', fontFamily: tokens.font, fontSize: '1rem', lineHeight: 1.55, overflowWrap: 'anywhere' },
   editActions: { display: 'flex', justifyContent: 'flex-end', gap: 4, marginTop: 8 },
-  textButton: { minHeight: 36, padding: '0 12px', borderWidth: 0, borderRadius: 18, backgroundColor: 'transparent', color: tokens.text, fontSize: '0.8125rem', fontFamily: tokens.font, fontWeight: 600 },
-  saveButton: { backgroundColor: tokens.primary, color: tokens.primaryForeground },
   attachments: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   image: { width: 100, maxWidth: '100%', height: 100, objectFit: 'cover', borderRadius: 16 },
   error: { margin: 0, fontSize: '0.8125rem', color: tokens.danger, overflowWrap: 'anywhere' },

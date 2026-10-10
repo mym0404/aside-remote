@@ -10,13 +10,15 @@ import type { ChatSession, Toast } from './types';
 import { tokens } from './tokens.stylex';
 import { Sidebar } from './Sidebar';
 import { Composer } from './Composer';
+import { Button } from './Button';
+import { Dialog, DialogActions, DialogDescription } from './Dialog';
 import { BrowserLive } from './BrowserLive';
 import { BrowserPanel } from './BrowserPanel';
 import { ImagePreview } from './ImagePreview';
 import { Settings } from './Settings';
 import { RenameConversation, SessionMenu, type SessionMenuTarget } from './SessionMenu';
 import { applyTheme, THEME_STORAGE_KEY, applyTextSize, loadTextSize, TEXT_SIZE_STORAGE_KEY, type Theme } from './theme';
-import { ICON_STROKE, SESSION_MENU_LABEL, CloseButton, Dialog, DialogBackdropReset, IconButton, focusDialogSurface, resolveDialogReturnFocus, trapDialogFocus, styles as ui } from './ui';
+import { ICON_STROKE, SESSION_MENU_LABEL, DELETE_CONVERSATION_TITLE, OPEN_DIALOG_SELECTOR, Sheet, DialogBackdropReset, IconButton, focusDialogSurface, resolveDialogReturnFocus, trapDialogFocus, styles as ui } from './ui';
 
 const Messages = lazy(() => import('./Messages').then(module => ({ default: module.Messages })));
 const ZOOM_GESTURE_EVENTS = ['gesturestart', 'gesturechange'];
@@ -94,7 +96,7 @@ export function App() {
       const target = event.target;
       if (event.touches.length !== 1 || !(target instanceof Element) || !matchMedia('(max-width: 820px)').matches) return;
       if (target.closest('input, textarea, select, [contenteditable="true"], [data-selectable="true"], [aria-label="Live browser preview"], [popover]') || horizontalScroller(target)) return;
-      const dialog = target.closest('dialog');
+      const dialog = target.closest('dialog, [data-app-dialog]');
       if (dialog ? dialog.getAttribute('aria-label') !== 'Conversation menu' : !target.closest('main[aria-label="Chat"]')) return;
       const touch = event.touches[0];
       swipe = { id: touch.identifier, x: touch.clientX, y: touch.clientY, horizontal: false };
@@ -120,7 +122,7 @@ export function App() {
       if (!touch) return;
       const dx = touch.clientX - current.x;
       if (Math.abs(dx) < DRAWER_SWIPE_DISTANCE || document.querySelector('[popover]:popover-open')) return;
-      if (dx > 0 && !isDrawer && !document.querySelector('dialog[open]')) setDrawer(true);
+      if (dx > 0 && !isDrawer && !document.querySelector(OPEN_DIALOG_SELECTOR)) setDrawer(true);
       else if (dx < 0 && isDrawer) { setMenuSession(undefined); setDrawer(false); }
     }
     function preventHorizontalNavigation(event: WheelEvent) {
@@ -231,10 +233,10 @@ export function App() {
       <Composer chat={chat} onBrowser={() => openPanel('browser')} draft={draft} setDraft={setDraft} revision={revision} notify={notify} textSize={textSize} isKeyboardOpen={isKeyboardOpen} />
     </main>
     <AnimatePresence>{isDrawer && <Drawer key="drawer" onClose={() => { setMenuSession(undefined); setDrawer(false); }}><Sidebar chat={chat} isDrawer onClose={() => { setMenuSession(undefined); setDrawer(false); }} onNew={newChat} onOpen={openSession} onSettings={() => openPanel('settings')} onBrowser={() => openPanel('browser')} onMenu={setMenuSession} /></Drawer>}</AnimatePresence>
-    <AnimatePresence mode="wait">{panel && <Dialog key={panel === 'browser' ? `browser:${browserTarget ?? "all"}` : panel} title={panel === 'browser' ? 'Browser' : 'Settings'} isWide={panel === 'browser'} onClose={closePanel}>{panel === 'settings' ? <Settings chat={chat} notifications={notifications} notify={notify} onClose={closePanel} isDarkMode={theme === 'dark'} onThemeToggle={toggleTheme} textSize={textSize} onTextSizeChange={changeTextSize} /> : <BrowserPanel initialTargetId={browserTarget} sessionId={browserTarget ? chat.sessionId : undefined} request={chat.request} notify={notify} onClose={closePanel} onStart={prompt => { closePanel(); if (!browserTarget) newChat(); setDraft(prompt); }} />}</Dialog>}</AnimatePresence>
-    {menuSession && !chat.authError && <SessionMenu key={menuSession.id} target={menuSession} chat={chat} onClose={() => setMenuSession(undefined)} notify={notify} onRename={setRenameTarget} onDelete={session => { setDrawer(false); setDeleteTarget(session); }} />}
-    <AnimatePresence>{renameTarget && <Dialog key={renameTarget.id} title="Rename conversation" onClose={() => setRenameTarget(undefined)}><RenameConversation session={renameTarget} chat={chat} onClose={() => setRenameTarget(undefined)} /></Dialog>}</AnimatePresence>
-    <AnimatePresence>{deleteTarget && <Dialog key={deleteTarget.id} title="Delete conversation?" onClose={() => setDeleteTarget(undefined)}><div {...stylex.props(styles.dialogHeader)}><h2 {...stylex.props(ui.title)}>Delete conversation?</h2><CloseButton onClick={() => setDeleteTarget(undefined)} /></div><p {...stylex.props(styles.deleteTitle)}>{deleteTarget.title}</p><p {...stylex.props(ui.muted)}>This also deletes the original conversation and its files in Aside. This cannot be undone.</p><div {...stylex.props(styles.dialogActions)}><button {...stylex.props(ui.button)} autoFocus onClick={() => setDeleteTarget(undefined)}>Cancel</button><button {...stylex.props(ui.button, ui.danger)} onClick={() => { setDeleteTarget(undefined); void chat.deleteSession(deleteTarget.id); }}>Delete</button></div></Dialog>}</AnimatePresence>
+    <AnimatePresence mode="wait">{panel === 'settings' ? <Dialog key="settings" title="Settings" onClose={closePanel}><Settings chat={chat} notifications={notifications} notify={notify} isDarkMode={theme === 'dark'} onThemeToggle={toggleTheme} textSize={textSize} onTextSizeChange={changeTextSize} /></Dialog> : panel === 'browser' ? <Sheet key={`browser:${browserTarget ?? "all"}`} title="Browser" isWide onClose={closePanel}><BrowserPanel initialTargetId={browserTarget} sessionId={browserTarget ? chat.sessionId : undefined} request={chat.request} notify={notify} onClose={closePanel} onStart={prompt => { closePanel(); if (!browserTarget) newChat(); setDraft(prompt); }} /></Sheet> : undefined}</AnimatePresence>
+    {menuSession && !chat.authError && <SessionMenu key={menuSession.id} target={menuSession} chat={chat} onClose={() => setMenuSession(undefined)} notify={notify} onRename={setRenameTarget} onDelete={setDeleteTarget} />}
+    <AnimatePresence>{renameTarget && <RenameConversation key={renameTarget.id} session={renameTarget} chat={chat} onClose={() => setRenameTarget(undefined)} />}</AnimatePresence>
+    <AnimatePresence>{deleteTarget && <Dialog key={deleteTarget.id} title={DELETE_CONVERSATION_TITLE} initialFocus={() => document.querySelector<HTMLElement>('[data-app-dialog] button[data-cancel]')} onClose={() => setDeleteTarget(undefined)}><p {...stylex.props(styles.deleteTitle)}>{deleteTarget.title}</p><DialogDescription>This also deletes the original conversation and its files in Aside. This cannot be undone.</DialogDescription><DialogActions><Button data-cancel="" onClick={() => setDeleteTarget(undefined)}>Cancel</Button><Button variant="danger" onClick={() => { setDeleteTarget(undefined); setDrawer(false); void chat.deleteSession(deleteTarget.id); }}>Delete</Button></DialogActions></Dialog>}</AnimatePresence>
     <AnimatePresence>{zoom && <ImagePreview key={zoom} src={zoom} onClose={() => setZoom(undefined)} />}</AnimatePresence>
     <ToastStack toasts={toasts} onDismiss={dismissToast} />
   </div></MotionConfig>;
@@ -256,10 +258,10 @@ function ToastStack({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: st
   const visibleToasts = toasts.slice(-TOAST_STACK_LIMIT);
   const [portalTarget, setPortalTarget] = useState<HTMLElement>(() => document.body);
   useLayoutEffect(() => {
-    const updateTarget = () => setPortalTarget([...document.querySelectorAll<HTMLDialogElement>('dialog[open]')].at(-1) ?? document.body);
+    const updateTarget = () => setPortalTarget([...document.querySelectorAll<HTMLElement>(OPEN_DIALOG_SELECTOR)].at(-1) ?? document.body);
     updateTarget();
     const observer = new MutationObserver(updateTarget);
-    observer.observe(document.body, { attributes: true, attributeFilter: ['open'], subtree: true });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['open', 'data-open'], childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
   const dismissNotification = useCallback((id: string) => {
@@ -267,7 +269,7 @@ function ToastStack({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: st
     if (activeElement instanceof HTMLElement && activeElement.closest('[data-toast-id]')?.getAttribute('data-toast-id') === id) {
       const previous = returnFocusRef.current;
       if (previous?.isConnected && !previous.matches(':disabled') && previous.getClientRects().length) previous.focus({ preventScroll: true });
-      else { const dialog = activeElement.closest('dialog'); if (dialog) focusDialogSurface(dialog); else document.querySelector<HTMLButtonElement>('button[aria-label="New chat"]')?.focus({ preventScroll: true }); }
+      else { const dialog = activeElement.closest<HTMLElement>('dialog, [data-app-dialog]'); if (dialog instanceof HTMLDialogElement) focusDialogSurface(dialog); else if (dialog) dialog.focus({ preventScroll: true }); else document.querySelector<HTMLButtonElement>('button[aria-label="New chat"]')?.focus({ preventScroll: true }); }
     }
     onDismiss(id);
   }, [onDismiss]);
@@ -289,12 +291,12 @@ function ToastStack({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: st
 function Drawer({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null); const closeRequestedRef = useRef(false); const shouldReduceMotion = useReducedMotion(); const [isPresent, safeToRemove] = usePresence();
-  useLayoutEffect(() => { if (isPresent) closeRequestedRef.current = false; }, [isPresent]);
+  useLayoutEffect(() => { if (isPresent) closeRequestedRef.current = false; else ref.current?.close(); }, [isPresent]);
   useEffect(() => { if (isPresent || !safeToRemove) return; const timer = window.setTimeout(safeToRemove, shouldReduceMotion ? 120 : 240); return () => window.clearTimeout(timer); }, [isPresent, safeToRemove, shouldReduceMotion]);
   useLayoutEffect(() => {
     const dialog = ref.current; returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     if (dialog && !dialog.open) { dialog.showModal(); focusDialogSurface(dialog); }
-    return () => { if (dialog?.open) dialog.close(); requestAnimationFrame(() => { if (!document.querySelector('dialog[open]')) resolveDialogReturnFocus(returnFocusRef.current, 'Conversation menu')?.focus({ preventScroll: true }); }); };
+    return () => { if (dialog?.open) dialog.close(); requestAnimationFrame(() => { if (!document.querySelector(OPEN_DIALOG_SELECTOR)) resolveDialogReturnFocus(returnFocusRef.current, 'Conversation menu')?.focus({ preventScroll: true }); }); };
   }, []);
   function requestClose() { if (!isPresent || closeRequestedRef.current) return; closeRequestedRef.current = true; onClose(); }
   return <motion.dialog ref={ref} tabIndex={-1} data-motion-overlay="" style={{ pointerEvents: isPresent ? 'auto' : 'none' }} aria-label="Conversation menu" {...stylex.props(styles.drawer)} onKeyDown={trapDialogFocus} onCancel={event => { event.preventDefault(); requestClose(); }}>
@@ -325,12 +327,10 @@ const styles = stylex.create({
   noticeAction: { backgroundColor: 'transparent', color: tokens.text, borderWidth: 0, minHeight: 32, fontSize: '0.8125rem', textDecoration: 'underline' },
   connectionIndicator: { position: 'absolute', top: 'calc(var(--header-height) + 4px)', left: '50%', marginLeft: -7, width: 14, height: 14, zIndex: 3, pointerEvents: 'none' },
   connectionSpinner: { display: 'block', width: '100%', height: '100%', borderRadius: '50%', borderWidth: 2, borderStyle: 'solid', borderColor: tokens.muted, borderTopColor: 'transparent' },
-  drawer: { position: 'fixed', inset: 0, padding: 0, margin: 0, borderWidth: 0, backgroundColor: 'transparent', width: '100%', height: '100dvh', maxWidth: '100%', maxHeight: '100%', overflow: 'hidden' },
+  drawer: { display: 'block', position: 'fixed', inset: 0, padding: 0, margin: 0, borderWidth: 0, backgroundColor: 'transparent', width: '100%', height: '100dvh', maxWidth: '100%', maxHeight: '100%', overflow: 'hidden' },
   drawerBackdrop: { position: 'absolute', inset: 0, width: '100%', height: '100%', padding: 0, borderWidth: 0, backgroundColor: 'rgb(0 0 0 / .28)' },
   drawerContent: { position: 'relative', zIndex: 1, width: 'min(320px, 87vw)', height: '100%', boxShadow: '8px 0 32px rgb(0 0 0 / .08)' },
-  dialogHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   deleteTitle: { fontSize: '1rem', fontWeight: 550, lineHeight: 1.5, overflowWrap: 'anywhere' },
-  dialogActions: { display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 22 },
   toasts: { position: 'fixed', top: 'calc(env(safe-area-inset-top) + 72px)', right: 16, left: 16, bottom: 'auto', margin: 0, width: 'auto', height: 'auto', borderWidth: 0, padding: 0, overflow: 'visible', backgroundColor: 'transparent', display: 'grid', justifyItems: 'center', zIndex: 10, pointerEvents: 'none' },
   toast: { gridArea: '1 / 1', transformOrigin: 'top center', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px 10px 16px', minHeight: 48, width: '100%', maxWidth: 440, boxSizing: 'border-box', backgroundColor: tokens.text, color: tokens.canvas, borderRadius: 18, boxShadow: '0 4px 20px rgb(0 0 0 / .14)', pointerEvents: 'none' },
   toastMessage: { flex: 1, fontSize: '0.8125rem', lineHeight: 1.45, overflowWrap: 'anywhere', minWidth: 0, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 3, overflow: 'hidden' },

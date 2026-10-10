@@ -4,7 +4,7 @@ import { animate, motion, useMotionValue, useReducedMotion } from 'motion/react'
 import { Minus, Plus, X } from 'lucide-react';
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from './tokens.stylex';
-import { Dialog, IconButton, ICON_STROKE } from './ui';
+import { Sheet, IconButton, ICON_STROKE } from './ui';
 import { OPEN_IN_BROWSER_LABEL } from './browser';
 
 const MIN_ZOOM = 1;
@@ -43,7 +43,7 @@ export function ImagePreview({ src, title = 'Image', url, kind = 'image', onClos
     return () => { swipeY.stop(); observer.disconnect(); viewport.removeEventListener('wheel', wheel); };
   }, [scale, x, y, swipeY]);
 
-  return <Dialog title={dialogTitle} isFullScreen swipeY={swipeY} onClose={onClose}>
+  return <Sheet title={dialogTitle} isFullScreen swipeY={swipeY} onClose={onClose}>
     <section ref={viewerRef} {...stylex.props(styles.viewer)}
         onPointerDown={event => {
           if (isDismissingRef.current || event.button !== 0 || pointersRef.current.length >= 2 || event.target instanceof Element && event.target.closest('button, a')) return;
@@ -92,7 +92,7 @@ export function ImagePreview({ src, title = 'Image', url, kind = 'image', onClos
       </div>
       <footer {...stylex.props(styles.controls)}><IconButton label="Zoom out" disabled={zoom === MIN_ZOOM * PERCENT_SCALE} onClick={() => zoomAt(scale.get() / ZOOM_STEP)}><Minus size={22} strokeWidth={ICON_STROKE} /></IconButton><button type="button" aria-label={`Reset zoom, ${zoom}%`} {...stylex.props(styles.reset)} onClick={() => applyTransform(MIN_ZOOM, 0, 0)}>{zoom}%</button><IconButton label="Zoom in" disabled={zoom === MAX_ZOOM * PERCENT_SCALE} onClick={() => zoomAt(scale.get() * ZOOM_STEP)}><Plus size={22} strokeWidth={ICON_STROKE} /></IconButton></footer>
     </section>
-  </Dialog>;
+  </Sheet>;
 
   function applyTransform(nextScale: number, nextX: number, nextY: number) {
     const viewport = viewportRef.current;

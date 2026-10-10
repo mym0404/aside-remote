@@ -45,7 +45,7 @@ Click any image to view it at full size.
   <tr>
     <td><a href="docs/screenshots/conversation-drawer.jpg"><img src="docs/screenshots/conversation-drawer.jpg" width="240" alt="Drawer searching for the public README demo conversation"></a></td>
     <td><a href="docs/screenshots/conversation-menu.jpg"><img src="docs/screenshots/conversation-menu.jpg" width="240" alt="Conversation menu with pin, rename, share, copy link, and copy session ID"></a></td>
-    <td><a href="docs/screenshots/model-picker.jpg"><img src="docs/screenshots/model-picker.jpg" width="240" alt="Model selection sheet with providers and reasoning effort"></a></td>
+    <td><a href="docs/screenshots/model-picker.jpg"><img src="docs/screenshots/model-picker.jpg" width="240" alt="Model selection dialog with providers and reasoning effort"></a></td>
   </tr>
   <tr>
     <th>Browser picture-in-picture</th>
@@ -55,7 +55,7 @@ Click any image to view it at full size.
   <tr>
     <td><a href="docs/screenshots/browser-pip.jpg"><img src="docs/screenshots/browser-pip.jpg" width="240" alt="Live browser preview beside completed browser actions"></a></td>
     <td><a href="docs/screenshots/browser-sheet.jpg"><img src="docs/screenshots/browser-sheet.jpg" width="240" alt="Browser sheet showing the page title, URL, preview, and Open in your browser action"></a></td>
-    <td><a href="docs/screenshots/settings.jpg"><img src="docs/screenshots/settings.jpg" width="240" alt="Settings showing bridge and browser connection status and response notification controls"></a></td>
+    <td><a href="docs/screenshots/settings.jpg"><img src="docs/screenshots/settings.jpg" width="240" alt="Settings dialog showing connection and notification status"></a></td>
   </tr>
 </table>
 
@@ -1243,9 +1243,14 @@ npm run dev
 Open `http://127.0.0.1:5173`. Vite proxies API and WebSocket requests to port 8800.
 Use the production build/HTTPS hosting route for Home Screen and push checks.
 
-The frontend uses React, TypeScript, StyleX, React Compiler, and Vite. Source is
+The frontend uses React, TypeScript, StyleX, React Compiler, Base UI, and Vite. Source is
 in `web/src`; Python serves `web/dist`. Message rendering loads on demand; the
 browser panel is included with the app shell.
+
+Base UI dialogs handle conversation renaming and deletion, model selection,
+settings, and tab opening and closing. They stay centered on phones, including
+above the keyboard. Browser browsing and media previews use sheets. Action buttons
+share secondary, primary, and destructive variants of Base UI Button.
 
 The bridge uses Aside's installed CLI, a persistent MCP browser REPL, PTY-backed
 agent runs, the local daemon, and session files. Intermediate messages stream

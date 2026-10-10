@@ -61,7 +61,7 @@ check('no boot errors', runtimeErrors.length === 0);
 check('conversation list rendered', document.querySelectorAll('aside[aria-label="Conversations"]').length === 1);
 check('settings refresh restores the last conversation in the background', location.pathname === '/settings' && document.querySelector('[aria-current="page"]')?.textContent.includes('Beta'));
 check('restored messages rendered', document.querySelector('[aria-label="Your message"]')?.textContent.includes('Inspect this'));
-click(document.querySelector('dialog[aria-label="Settings"] button[aria-label="Close"]'));
+click(document.querySelector('[role="dialog"][data-app-dialog] button[aria-label="Close"]'));
 await waitFor(() => location.pathname === '/c/BBB');
 
 console.log('activity state and mobile drawer');

@@ -6,6 +6,7 @@ import type { UseChat } from './types';
 import type { SessionMenuTarget } from './SessionMenu';
 import { tokens } from './tokens.stylex';
 import { ICON_STROKE, BrowserIcon, IconButton, styles as ui } from './ui';
+import { Button } from './Button';
 
 export function Sidebar({ chat, isDrawer, onClose, onNew, onOpen, onSettings, onBrowser, onMenu }: {
   chat: UseChat; isDrawer?: boolean; onClose?: () => void; onNew: () => void; onOpen: (id: string) => void; onSettings: () => void; onBrowser: () => void; onMenu: (target: SessionMenuTarget) => void;
@@ -58,7 +59,7 @@ export function Sidebar({ chat, isDrawer, onClose, onNew, onOpen, onSettings, on
 }
 
 function SessionListFooter({ context: chat }: { context?: UseChat }) {
-  return chat?.hasMore ? <button {...stylex.props(ui.button, styles.more)} onClick={() => void chat.loadMore()} disabled={chat.isLoadingMore}>{chat.isLoadingMore ? 'Loading…' : 'Show more'}<ChevronRight size={16} /></button> : undefined;
+  return chat?.hasMore ? <Button {...stylex.props(styles.more)} onClick={() => void chat.loadMore()} disabled={chat.isLoadingMore}>{chat.isLoadingMore ? 'Loading…' : 'Show more'}<ChevronRight size={16} /></Button> : undefined;
 }
 const sessionListComponents = { Footer: SessionListFooter };
 

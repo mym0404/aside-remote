@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { ArrowUp, Plus, Square, X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { tokens } from './tokens.stylex';
-import { ICON_STROKE, BrowserIcon, IconButton, styles as ui } from './ui';
+import { ICON_STROKE, OPEN_DIALOG_SELECTOR, BrowserIcon, IconButton, styles as ui } from './ui';
 import type { UploadAttachment, UseChat } from './types';
 import { ModelPicker, useModelSelection } from './ModelPicker';
 
@@ -40,7 +40,7 @@ export function Composer({ chat, onBrowser, draft, setDraft, revision, notify, t
     revisionRef.current = revision;
     pendingPreviewRevokesRef.current.push(...attachmentRef.current.map(attachment => attachment.preview));
     attachmentRef.current = []; setAttachments([]);
-    if (!document.querySelector('dialog[open]')) input.current?.focus({ preventScroll: true });
+    if (!document.querySelector(OPEN_DIALOG_SELECTOR)) input.current?.focus({ preventScroll: true });
   }, [revision]);
   useEffect(() => () => [...attachmentRef.current.map(attachment => attachment.preview), ...pendingPreviewRevokesRef.current].forEach(preview => URL.revokeObjectURL(preview)), []);
   function resizeInput() { if (input.current) { input.current.style.height = 'auto'; input.current.style.height = Math.min(input.current.scrollHeight, MAX_DRAFT_HEIGHT) + 'px'; } }

@@ -14,6 +14,11 @@
   font-display: swap;
 }
 @layer reset {
+  [data-app-dialog], [data-app-dialog-backdrop] { opacity: 1; transition: opacity .16s ease, transform .16s ease; }
+  [data-app-dialog] { transform: scale(1); }
+  [data-app-dialog][data-starting-style], [data-app-dialog][data-ending-style] { opacity: 0; transform: scale(.97); }
+  [data-app-dialog-backdrop][data-starting-style], [data-app-dialog-backdrop][data-ending-style] { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { [data-app-dialog], [data-app-dialog-backdrop] { transition: none; } }
   * { box-sizing: border-box; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   html, body, #root { margin: 0; width: 100%; height: 100%; min-width: 0; overflow: hidden; overscroll-behavior-x: none; }
   html {
@@ -50,7 +55,7 @@
   #composer:focus-within { --composer-tools-display: flex; }
   @media (pointer: coarse) {
     #composer:focus-within { --composer-tools-display: var(--keyboard-tools-display, none); }
-    #composer:has(dialog[open]) { --composer-tools-display: flex; }
+    body:has([data-app-dialog][data-open]) #composer { --composer-tools-display: flex; }
   }
   :focus, :focus-visible { outline: none; }
   img { max-width: 100%; }

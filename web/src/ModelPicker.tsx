@@ -4,7 +4,9 @@ import { Check, ChevronDown } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { parseModelConfig, parseModels } from './responses';
 import { tokens } from './tokens.stylex';
-import { CloseButton, Dialog, ICON_STROKE, styles as ui } from './ui';
+import { ICON_STROKE, styles as ui } from './ui';
+import { Dialog } from './Dialog';
+import { Button } from './Button';
 import type { AvailableModel, ModelConfig, UseChat } from './types';
 
 const MODEL_STORAGE_KEY = 'asideModel';
@@ -91,9 +93,8 @@ export function ModelPicker({ selection, disabled, isRunning }: {
       <span {...stylex.props(styles.triggerText)}><span {...stylex.props(styles.name)}>{name}</span>{thinkingLabel && <span {...stylex.props(styles.effort)}>{thinkingLabel}</span>}</span><ChevronDown size={13} strokeWidth={ICON_STROKE} aria-hidden="true" />
     </button>
     <AnimatePresence>{isOpen && <Dialog key="models" title="Models" onClose={close}>
-      <div {...stylex.props(styles.header)}><h2 {...stylex.props(ui.title)}>Models</h2><CloseButton onClick={close} /></div>
       {isRunning && <p {...stylex.props(styles.note)}>Applies to your next response.</p>}
-      {selection.error ? <p role="alert" {...stylex.props(styles.note)}>{selection.error} <button type="button" {...stylex.props(styles.retry)} onClick={selection.reload}>Try again</button></p> : !selection.current && <p role="status" {...stylex.props(styles.note)}>Loading models…</p>}
+      {selection.error ? <p role="alert" {...stylex.props(styles.note)}>{selection.error} <Button size="compact" onClick={selection.reload}>Try again</Button></p> : !selection.current && <p role="status" {...stylex.props(styles.note)}>Loading models…</p>}
       {current && selection.current && <label {...stylex.props(styles.reasoning)}><span>Reasoning effort</span>
         <select aria-label="Reasoning effort" value={selection.current.thinkingLevel} disabled={disabled || selection.isUpdating} {...stylex.props(styles.effortSelect)} onChange={event => { void selection.select(current, event.target.value); }}>
           {current.thinkingLevels.map(level => <option key={level} value={level}>{THINKING_LABELS[level] ?? level}</option>)}
@@ -125,9 +126,7 @@ const styles = stylex.create({
   name: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   triggerText: { display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 },
   effort: { fontSize: '0.625rem' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   note: { color: tokens.muted, fontSize: '0.8125rem', lineHeight: 1.5, margin: '0 0 14px' },
-  retry: { borderWidth: 0, backgroundColor: 'transparent', color: tokens.text, padding: '8px 4px', fontSize: 'inherit' },
   group: { marginBottom: 16 },
   reasoning: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 12px', marginBottom: 20, color: tokens.muted, fontSize: '0.8125rem' },
   effortSelect: { minHeight: 44, maxWidth: '55%', borderWidth: 0, borderRadius: 12, padding: '0 12px', backgroundColor: tokens.surface, color: tokens.text, fontFamily: 'inherit', fontSize: '0.875rem' },

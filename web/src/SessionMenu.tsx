@@ -5,7 +5,9 @@ import type { UseChat } from './types';
 import { parseSessionDetails } from './responses';
 import { PopoverMenu } from './PopoverMenu';
 import { tokens } from './tokens.stylex';
-import { CloseButton, ICON_STROKE, styles as ui } from './ui';
+import { ICON_STROKE, RENAME_CONVERSATION_TITLE, styles as ui } from './ui';
+import { Button } from './Button';
+import { Dialog, DialogActions, DialogDescription } from './Dialog';
 
 export type SessionMenuTarget = { id: string; title: string; anchor: HTMLElement; point?: { x: number; y: number } };
 type Conversation = { id: string; title: string };
@@ -55,21 +57,18 @@ export function SessionMenu({ target, chat, onClose, onRename, onDelete, notify 
 export function RenameConversation({ session, chat, onClose }: { session: Conversation; chat: UseChat; onClose: () => void }) {
   const [title, setTitle] = useState(session.title);
   const input = useRef<HTMLInputElement>(null);
-  useEffect(() => { input.current?.focus({ preventScroll: true }); }, []);
-  return <form onSubmit={event => {
+  return <Dialog title={RENAME_CONVERSATION_TITLE} initialFocus={input} onClose={onClose}><form onSubmit={event => {
     event.preventDefault(); if (!title.trim()) return;
     onClose(); void chat.updateSession(session.id, { title: title.trim() });
   }}>
-    <div {...stylex.props(styles.header)}><h2 {...stylex.props(ui.title)}>Rename conversation</h2><CloseButton onClick={onClose} /></div>
-    <input ref={input} autoFocus aria-label="Conversation name" maxLength={120} value={title} {...stylex.props(ui.field)} onChange={event => setTitle(event.target.value)} />
-    <div {...stylex.props(styles.formActions)}><button type="button" {...stylex.props(ui.button)} onClick={onClose}>Cancel</button><button type="submit" {...stylex.props(ui.button, ui.primary)} disabled={!title.trim()}>Save</button></div>
-  </form>;
+    <DialogDescription>Choose a name for this conversation.</DialogDescription>
+    <input ref={input} aria-label="Conversation name" maxLength={120} value={title} {...stylex.props(ui.field)} onChange={event => setTitle(event.target.value)} />
+    <DialogActions><Button onClick={onClose}>Cancel</Button><Button type="submit" variant="primary" disabled={!title.trim()}>Save</Button></DialogActions>
+  </form></Dialog>;
 }
 
 const styles = stylex.create({
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
   pin: { color: tokens.primary },
   title: { margin: '4px 12px 8px', fontSize: '0.8125rem', lineHeight: 1.4, color: tokens.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   action: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 44, width: '100%', padding: '10px 12px', borderWidth: 0, borderRadius: 14, textAlign: 'left', color: tokens.text, backgroundColor: { default: 'transparent', ':hover': tokens.hover }, fontSize: '0.875rem', lineHeight: 1.4 },
-  formActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 },
 });

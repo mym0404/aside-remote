@@ -1,13 +1,15 @@
 import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { X } from 'lucide-react';
 import { motion, usePresence, useReducedMotion, useTransform, type HTMLMotionProps, type MotionValue } from 'motion/react';
 import { tokens } from './tokens.stylex';
 
 export const ICON_STROKE = 1.8;
 export const SESSION_MENU_LABEL = 'Session options';
 export const SESSION_MENU_TITLE = 'Session';
+export const RENAME_CONVERSATION_TITLE = 'Rename conversation';
+export const DELETE_CONVERSATION_TITLE = 'Delete conversation?';
+export const OPEN_DIALOG_SELECTOR = 'dialog[open], [data-app-dialog][data-open]';
 const DIALOG_EASE = [0.22, 1, 0.36, 1] as const;
 const SHEET_CLOSED_Y = '100%';
 
@@ -20,7 +22,7 @@ export function BrowserIcon({ size = 22 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={ICON_STROKE} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M3 9h18" /><path d="M6.5 6.5h.01M9.5 6.5h.01M12.5 6.5h.01" strokeWidth="2" /></svg>;
 }
 
-export function Dialog({ title, children, onClose, isWide = false, isFullScreen = false, swipeY }: { title: string; children: ReactNode; onClose: () => void; isWide?: boolean; isFullScreen?: boolean; swipeY?: MotionValue<number> }) {
+export function Sheet({ title, children, onClose, isWide = false, isFullScreen = false, swipeY }: { title: string; children: ReactNode; onClose: () => void; isWide?: boolean; isFullScreen?: boolean; swipeY?: MotionValue<number> }) {
   const ref = useRef<HTMLDialogElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -109,11 +111,12 @@ export function Dialog({ title, children, onClose, isWide = false, isFullScreen 
     return () => {
       if (dialog?.open) dialog.close();
       requestAnimationFrame(() => {
-        const remaining = [...document.querySelectorAll<HTMLDialogElement>('dialog[open]')].at(-1);
+        const remaining = [...document.querySelectorAll<HTMLElement>(OPEN_DIALOG_SELECTOR)].at(-1);
         if (remaining) {
           const captured = returnFocusRef.current;
           if (captured?.isConnected && remaining.contains(captured)) captured.focus({ preventScroll: true });
-          else focusDialogSurface(remaining);
+          else if (remaining instanceof HTMLDialogElement) focusDialogSurface(remaining);
+          else remaining.focus({ preventScroll: true });
           return;
         }
         resolveDialogReturnFocus(returnFocusRef.current, title)?.focus({ preventScroll: true });
@@ -138,8 +141,6 @@ export function Dialog({ title, children, onClose, isWide = false, isFullScreen 
     </motion.div>
   </motion.dialog>;
 }
-
-export function CloseButton({ onClick }: { onClick: () => void }) { return <IconButton label="Close" onClick={onClick}><X size={22} strokeWidth={ICON_STROKE} /></IconButton>; }
 
 export function DialogBackdropReset() {
   return <style>{'dialog[data-motion-overlay]::backdrop{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}'}</style>;
@@ -168,7 +169,7 @@ export function trapDialogFocus(event: ReactKeyboardEvent<HTMLDialogElement>) {
 }
 
 export function resolveDialogReturnFocus(captured: HTMLElement | null, title: string) {
-  const preferredLabel = title === 'Browser' ? 'Open browser' : title === SESSION_MENU_TITLE ? SESSION_MENU_LABEL : 'Open conversations';
+  const preferredLabel = title === 'Browser' ? 'Open browser' : title === SESSION_MENU_TITLE || title === RENAME_CONVERSATION_TITLE || title === DELETE_CONVERSATION_TITLE ? SESSION_MENU_LABEL : 'Open conversations';
   return [captured,
     document.querySelector<HTMLElement>(`button[aria-label="${preferredLabel}"]`),
     document.querySelector<HTMLElement>('button[aria-label="New chat"]'),
@@ -206,11 +207,8 @@ export const styles = stylex.create({
   dragHandle: { display: 'none', height: 24, flexShrink: 0, alignItems: 'center', justifyContent: 'center', touchAction: 'none', cursor: 'grab', '@media (max-width: 700px)': { display: 'flex' } },
   dragHandleBar: { width: 36, height: 5, borderRadius: 999, backgroundColor: tokens.controlBorder },
   dialogBody: { padding: 22, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', overscrollBehavior: 'contain', minWidth: 0, '@media (max-width: 700px)': { padding: '8px 18px max(18px, env(safe-area-inset-bottom))', maxHeight: 'calc(100dvh - 32px)' } },
-  title: { fontSize: '1.3125rem', fontWeight: 650, lineHeight: 1.3, margin: 0 },
   row: { display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 },
   field: { width: '100%', minWidth: 0, borderWidth: 1, borderStyle: 'solid', borderColor: tokens.border, borderRadius: 14, padding: '12px 14px', backgroundColor: tokens.surface, color: tokens.text, fontSize: '1rem', lineHeight: 1.5 },
-  button: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderStyle: 'solid', borderColor: tokens.border, borderRadius: 14, minHeight: 44, padding: '10px 16px', fontSize: '0.875rem', fontWeight: 550, backgroundColor: { default: tokens.canvas, ':hover': tokens.surface }, color: tokens.text },
-  primary: { backgroundColor: { default: tokens.primary, ':hover': tokens.primaryHover }, color: tokens.primaryForeground, borderColor: tokens.primary },
   danger: { color: tokens.danger },
   muted: { fontSize: '0.875rem', lineHeight: 1.6, color: tokens.muted },
 });

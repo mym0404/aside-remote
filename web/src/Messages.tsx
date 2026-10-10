@@ -17,6 +17,7 @@ import { VISUAL_MESSAGE_PREFIX, visualDocument, visualTheme } from './visual';
 import { Activity } from './Activity';
 import { useMessageMenu } from './useMessageMenu';
 import { QueuedBubble } from './QueuedMessages';
+import { Button } from './Button';
 
 const markdownPlugins = [remarkGfm];
 const highlightPlugins = [rehypeHighlight];
@@ -77,7 +78,7 @@ function Visual({ source, notify }: { source: string; notify: (text: string, kin
     sendTheme();
     return () => { window.removeEventListener('message', receive); observer.disconnect(); };
   }, [id]);
-  return <div {...stylex.props(styles.code)}><div {...stylex.props(styles.codeHeader)}><button type="button" {...stylex.props(ui.button)} aria-label={isSource ? 'Show visual preview' : 'Show visual source'} onClick={() => setSource(!isSource)}><Code2 size={16} aria-hidden="true" />{isSource ? 'Preview' : 'Source'}</button><CopyButton text={source} notify={notify} /></div>
+  return <div {...stylex.props(styles.code)}><div {...stylex.props(styles.codeHeader)}><Button size="compact" aria-label={isSource ? 'Show visual preview' : 'Show visual source'} onClick={() => setSource(!isSource)}><Code2 size={16} aria-hidden="true" />{isSource ? 'Preview' : 'Source'}</Button><CopyButton text={source} notify={notify} /></div>
     <div hidden={isSource}><iframe ref={frameRef} title="HTML visual" sandbox="allow-scripts" referrerPolicy="no-referrer" srcDoc={srcDoc} {...stylex.props(styles.visual)} /></div>
     {isSource && <pre role="region" aria-label="Visual source" tabIndex={0} {...stylex.props(styles.previewSource)}>{source}</pre>}
   </div>;
@@ -100,7 +101,7 @@ function Diagram({ source, notify }: { source: string; notify: (text: string, ki
     void loadMermaid().then(async mermaid => { await document.fonts.ready; const result = await mermaid.render('diagram' + id, source); if (isActive) setSvg(result.svg); }).catch(() => { if (isActive) setError(true); });
     return () => { isActive = false; };
   }, [source, id]);
-  return <div {...stylex.props(styles.code)}><div {...stylex.props(styles.codeHeader)}><button {...stylex.props(ui.button)} onClick={() => setSource(!isSource)}><Code2 size={16} />{isSource ? 'Diagram' : 'Source'}</button><CopyButton text={source} notify={notify} /></div>
+  return <div {...stylex.props(styles.code)}><div {...stylex.props(styles.codeHeader)}><Button size="compact" onClick={() => setSource(!isSource)}><Code2 size={16} />{isSource ? 'Diagram' : 'Source'}</Button><CopyButton text={source} notify={notify} /></div>
     {isSource || hasError ? <pre role="region" aria-label="Diagram source" tabIndex={0} {...stylex.props(styles.previewSource)}>{source}</pre> : svg ? <div role="region" aria-label="Diagram" tabIndex={0} {...stylex.props(styles.diagram)} dangerouslySetInnerHTML={{ __html: svg }} /> : <p role="status" {...stylex.props(ui.muted, styles.diagram)}>Loading diagram…</p>}
   </div>;
 }
@@ -183,7 +184,7 @@ export function Messages({ chat, listRef, onAtBottomChange, notify, onZoom }: {
       const message = chat.queuedMessages[group.index];
       return <QueuedBubble message={message} index={group.index} chat={chat} isEditing={editingId === message.id} isAnotherEditing={hasEditor && editingId !== message.id} editText={editText} onEditTextChange={setEditText} onEditingChange={(isEditing, text) => { if (isEditing) setEditText(text ?? message.prompt); setEditingId(isEditing ? message.id : undefined); }} />;
     }
-    if (group.kind === 'paused') return <div role="status" {...stylex.props(styles.working)}>Queue paused<button type="button" {...stylex.props(ui.button)} disabled={chat.isUpdatingQueue} onClick={() => { void chat.resumeQueue(); }}>Resume</button></div>;
+    if (group.kind === 'paused') return <div role="status" {...stylex.props(styles.working)}>Queue paused<Button disabled={chat.isUpdatingQueue} onClick={() => { void chat.resumeQueue(); }}>Resume</Button></div>;
     if (group.kind !== 'message') return;
     const message = group.message;
     const raw = messageText(message);

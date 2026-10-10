@@ -14,11 +14,13 @@ import { AnimatePresence } from "motion/react"
 import { formatRequestError } from "./errors"
 
 import { tokens } from "./tokens.stylex"
-import { focusDialogSurface } from "./ui"
+import { focusDialogSurface, styles as ui } from "./ui"
 import { useAutoRefresh } from "./useAutoRefresh"
 import type { BrowserTab } from "./types"
 import { getWebsiteUrl, isTabResponse, OPEN_IN_BROWSER_LABEL } from "./browser"
 import { ImagePreview } from "./ImagePreview"
+import { Button } from "./Button"
+import { Dialog, DialogActions, DialogDescription } from "./Dialog"
 
 const TAB_REFRESH_INTERVAL_MS = 2_000
 const PREVIEW_REFRESH_INTERVAL_MS = 1_000
@@ -87,10 +89,6 @@ export function BrowserPanel({ request, notify, onStart, onClose, sessionId, ini
       selectedTargetRef.current = undefined
     }
   }, [selectedTab?.targetId])
-
-  useLayoutEffect(() => {
-    if (isConfirmingClose) cancelCloseRef.current?.focus({ preventScroll: false })
-  }, [isConfirmingClose])
 
   useLayoutEffect(() => {
     if (wasClosingRef.current && !isClosingTab) closeButtonRef.current?.focus({ preventScroll: true })
@@ -276,9 +274,9 @@ export function BrowserPanel({ request, notify, onStart, onClose, sessionId, ini
             <div {...stylex.props(styles.url)}>{selectedTab.url}</div>
           </div>
 
-          {websiteUrl && <a href={websiteUrl} target="_blank" rel="noopener noreferrer external" {...stylex.props(styles.secondaryButton)}>
+          {websiteUrl && <Button nativeButton={false} render={<a href={websiteUrl} target="_blank" rel="noopener noreferrer external" />} {...stylex.props(styles.externalLink)}>
             <ExternalLink size={18} strokeWidth={ICON_STROKE} aria-hidden="true" /> {OPEN_IN_BROWSER_LABEL}
-          </a>}
+          </Button>}
 
           <div {...stylex.props(styles.previewFrame)}>
             {previewUrl && !isSelectedTabAsleep && !isSelectedTabMissing && <button type="button" aria-label="Expand browser view" aria-haspopup="dialog" {...stylex.props(styles.expandPreview)} onClick={() => setPreviewExpanded(true)}><img {...stylex.props(styles.preview)} src={previewUrl} alt={`Current view of ${selectedTab.title || "browser tab"}`} draggable={false} /></button>}
@@ -299,9 +297,8 @@ export function BrowserPanel({ request, notify, onStart, onClose, sessionId, ini
             placeholder="What should happen on this page?"
             onChange={(event) => setInstruction(event.target.value)}
           />
-          <button
-            {...stylex.props(styles.primaryButton)}
-            type="button"
+          <Button
+            variant="primary"
             disabled={!!busyAction || !instruction.trim() || isSelectedTabAsleep || isSelectedTabMissing || previewStatus === "asleep" || previewStatus === "missing"}
             onClick={() => {
               const task = instruction.trim()
@@ -310,22 +307,18 @@ export function BrowserPanel({ request, notify, onStart, onClose, sessionId, ini
             }}
           >
             <Send size={18} strokeWidth={ICON_STROKE} /> Start in chat
-          </button>
+          </Button>
 
           <div {...stylex.props(styles.actionGrid)}>
-            <button {...stylex.props(styles.secondaryButton)} type="button" disabled={!!busyAction || isSelectedTabAsleep || isSelectedTabMissing || previewStatus === "missing"} onClick={() => void runTabAction("focus")}>
+            <Button disabled={!!busyAction || isSelectedTabAsleep || isSelectedTabMissing || previewStatus === "missing"} onClick={() => void runTabAction("focus")}>
               <Focus size={18} strokeWidth={ICON_STROKE} /> Focus
-            </button>
-            <button {...stylex.props(styles.secondaryButton)} type="button" disabled={!!busyAction} onClick={() => void runTabAction("open")}>
+            </Button>
+            <Button disabled={!!busyAction} onClick={() => void runTabAction("open")}>
               <ExternalLink size={18} strokeWidth={ICON_STROKE} /> Open copy
-            </button>
+            </Button>
           </div>
           <div {...stylex.props(styles.confirmRow)}>
-            {isConfirmingClose && <span {...stylex.props(styles.confirmText)}>Close this tab?</span>}
-            {isConfirmingClose && <button ref={cancelCloseRef} {...stylex.props(styles.textButton)} type="button" disabled={!!busyAction} onClick={() => { setIsConfirmingClose(false); closeButtonRef.current?.focus({ preventScroll: true }) }}>Cancel</button>}
-            <button ref={closeButtonRef} {...stylex.props(isConfirmingClose ? styles.dangerButton : styles.deleteButton)} type="button" disabled={!!busyAction} aria-busy={isClosingTab} onClick={() => isConfirmingClose ? void runTabAction("close") : setIsConfirmingClose(true)}>
-              {!isConfirmingClose && <Trash2 size={18} strokeWidth={ICON_STROKE} />}{isClosingTab ? "Closing…" : "Close tab"}
-            </button>
+            <Button ref={closeButtonRef} disabled={!!busyAction} aria-haspopup="dialog" onClick={() => setIsConfirmingClose(true)}><Trash2 size={18} strokeWidth={ICON_STROKE} />Close tab</Button>
           </div>
         </div>
       ) : (
@@ -352,31 +345,26 @@ export function BrowserPanel({ request, notify, onStart, onClose, sessionId, ini
                 </span>
               </button>
             ))}
-            {isOpenFormVisible ? (
-              <form {...stylex.props(styles.openForm)} onSubmit={(event) => { event.preventDefault(); void openNewTab() }}>
-                <label {...stylex.props(styles.openLabel)} htmlFor="new-browser-tab-url">Open a tab</label>
-                <div {...stylex.props(styles.openRow)}>
+            <Button {...stylex.props(styles.openDisclosure)} aria-haspopup="dialog" onClick={() => setIsOpenFormVisible(true)}><ExternalLink size={18} strokeWidth={ICON_STROKE} />Open a tab</Button>
+            <AnimatePresence>{isOpenFormVisible && <Dialog title="Open a tab" initialFocus={() => document.getElementById('new-browser-tab-url')} onClose={() => setIsOpenFormVisible(false)}>
+              <form onSubmit={(event) => { event.preventDefault(); void openNewTab() }}>
+                <DialogDescription>Enter the address of the website to open in Aside.</DialogDescription>
                   <input
                     id="new-browser-tab-url"
-                    {...stylex.props(styles.openInput)}
+                    {...stylex.props(ui.field)}
                     type="url" inputMode="url" autoCapitalize="none" autoCorrect="off"
                     value={newTabUrl}
                     placeholder="https://example.com"
                     onChange={(event) => setNewTabUrl(event.target.value)}
-                    autoFocus
+                    aria-label="Website address"
                   />
-                  <button {...stylex.props(styles.openButton)} type="submit">Open</button>
-                </div>
-                <button {...stylex.props(styles.textButton)} type="button" onClick={() => setIsOpenFormVisible(false)}>Cancel</button>
+                <DialogActions><Button onClick={() => setIsOpenFormVisible(false)}>Cancel</Button><Button variant="primary" type="submit" disabled={!newTabUrl.trim()}>Open</Button></DialogActions>
               </form>
-            ) : (
-              <button {...stylex.props(styles.openDisclosure)} type="button" onClick={() => setIsOpenFormVisible(true)}>
-                <ExternalLink size={18} strokeWidth={ICON_STROKE} /> Open a tab
-              </button>
-            )}
+            </Dialog>}</AnimatePresence>
           </div>
         </div>
       )}
+      <AnimatePresence>{isConfirmingClose && selectedTab && <Dialog title="Close this tab?" initialFocus={cancelCloseRef} onClose={() => setIsConfirmingClose(false)}><DialogDescription>{selectedTab.title || "Untitled tab"}</DialogDescription><DialogActions><Button ref={cancelCloseRef} onClick={() => setIsConfirmingClose(false)}>Cancel</Button><Button variant="danger" disabled={!!busyAction} onClick={() => { void runTabAction("close") }}>Close tab</Button></DialogActions></Dialog>}</AnimatePresence>
       <AnimatePresence>{isPreviewExpanded && previewUrl && selectedTab && !isSelectedTabAsleep && !isSelectedTabMissing && <ImagePreview kind="browser" key={selectedTab.targetId} src={previewUrl} title={selectedTab.title || "Browser"} url={websiteUrl} onClose={() => setPreviewExpanded(false)} />}</AnimatePresence>
     </section>
   )
@@ -491,20 +479,10 @@ const styles = stylex.create({
   previewBar: { minHeight: 44, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 },
   status: { minWidth: 0, color: tokens.muted, fontSize: '0.75rem', overflowWrap: "anywhere" },
   textarea: { width: "100%", minHeight: 88, resize: "vertical", padding: "13px 14px", borderWidth: 1, borderStyle: "solid", borderColor: tokens.border, borderRadius: 14, backgroundColor: tokens.canvas, color: tokens.text, fontFamily: tokens.font, fontSize: '1rem', lineHeight: 1.45 },
-  primaryButton: { minHeight: 48, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "0 18px", borderWidth: 0, borderRadius: 999, backgroundColor: { default: tokens.primary, ":hover": tokens.primaryHover }, color: tokens.primaryForeground, fontFamily: tokens.font, fontSize: '0.9375rem', fontWeight: 650 },
   actionGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 },
-  secondaryButton: { minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "0 14px", borderWidth: 1, borderStyle: "solid", borderColor: tokens.border, borderRadius: 999, backgroundColor: tokens.canvas, color: tokens.text, fontFamily: tokens.font, fontSize: '0.875rem', fontWeight: 600, textDecoration: "none" },
-  deleteButton: { minHeight: 44, width: "100%", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "0 14px", borderWidth: 0, backgroundColor: "transparent", color: tokens.danger, fontFamily: tokens.font, fontSize: '0.875rem', fontWeight: 600 },
+  externalLink: { textDecoration: 'none' },
   confirmRow: { minHeight: 52, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end", gap: 8, padding: "4px 0" },
-  confirmText: { flexBasis: "100%", color: tokens.muted, fontSize: '0.8125rem' },
-  dangerButton: { minHeight: 44, padding: "0 15px", borderWidth: 0, borderRadius: 999, backgroundColor: tokens.danger, color: tokens.canvas, fontFamily: tokens.font, fontSize: '0.875rem', fontWeight: 650, whiteSpace: "nowrap" },
-  textButton: { minHeight: 44, padding: "0 10px", borderWidth: 0, backgroundColor: "transparent", color: tokens.text, fontFamily: tokens.font, fontSize: '0.875rem', fontWeight: 600 },
   empty: { minHeight: 220, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 7, padding: 28, textAlign: "center", color: tokens.muted, fontSize: '0.875rem' },
-  openDisclosure: { width: "100%", minHeight: 48, marginTop: 8, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "0 16px", borderWidth: 1, borderStyle: "solid", borderColor: tokens.border, borderRadius: 14, backgroundColor: tokens.canvas, color: tokens.text, fontFamily: tokens.font, fontSize: '0.875rem', fontWeight: 600 },
-  openForm: { marginTop: 8, padding: 12, borderWidth: 1, borderStyle: "solid", borderColor: tokens.border, borderRadius: 14, backgroundColor: tokens.surface },
-  openLabel: { display: "block", marginBottom: 8, color: tokens.text, fontSize: '0.875rem', fontWeight: 650 },
-  openRow: { display: "flex", gap: 8 },
-  openInput: { minWidth: 0, minHeight: 44, flex: 1, padding: "0 12px", borderWidth: 1, borderStyle: "solid", borderColor: tokens.border, borderRadius: 11, backgroundColor: tokens.canvas, color: tokens.text, fontFamily: tokens.font, fontSize: '1rem' },
-  openButton: { minWidth: 70, minHeight: 44, padding: "0 14px", borderWidth: 0, borderRadius: 999, backgroundColor: { default: tokens.primary, ":hover": tokens.primaryHover }, color: tokens.primaryForeground, fontFamily: tokens.font, fontSize: '0.875rem', fontWeight: 650 },
+  openDisclosure: { width: '100%', marginTop: 8 },
   srOnly: { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", borderWidth: 0 },
 })
