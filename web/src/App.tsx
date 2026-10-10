@@ -309,7 +309,7 @@ const styles = stylex.create({
   header: { position: 'absolute', top: 0, left: 0, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, minHeight: 68, padding: 'calc(12px + env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 12px max(18px, env(safe-area-inset-left))', backgroundImage: 'linear-gradient(to bottom, var(--canvas), color-mix(in srgb, var(--canvas) 80%, transparent) 60%, transparent)', backdropFilter: 'blur(10px)', zIndex: 3, pointerEvents: 'none' },
   headerLeft: { display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 },
   heading: { display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 },
-  headerActions: { display: 'flex', alignItems: 'center', gap: 4, padding: '0 3px', borderRadius: 28, flexShrink: 0, pointerEvents: 'auto' },
+  headerActions: { display: 'flex', alignItems: 'center', gap: 0, padding: 0, borderRadius: 28, flexShrink: 0, pointerEvents: 'auto' },
   mobileMenu: { display: 'none', borderRadius: '50%', pointerEvents: 'auto', '@media (max-width: 820px)': { display: 'inline-flex' } },
   title: { fontSize: '.9375rem', lineHeight: 1.25, fontWeight: 650, letterSpacing: '-.2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   subtitle: { color: tokens.muted, fontSize: '.75rem', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },

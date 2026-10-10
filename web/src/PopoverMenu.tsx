@@ -42,7 +42,7 @@ export function PopoverMenu({ anchor, point, label, children, onClose }: {
     if (document.activeElement === menu) menu?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus({ preventScroll: true });
   }, [children]);
   useLayoutEffect(() => {
-    const outside = (event: Event) => { if (event.target instanceof Node && !ref.current?.contains(event.target)) onClose(); };
+    const outside = (event: Event) => { if (event.target instanceof Node && !ref.current?.contains(event.target) && !(event.type === 'pointerdown' && anchor.contains(event.target))) onClose(); };
     window.addEventListener('pointerdown', outside, true);
     window.addEventListener('wheel', outside, { passive: true });
     window.addEventListener('resize', onClose);
@@ -51,7 +51,7 @@ export function PopoverMenu({ anchor, point, label, children, onClose }: {
       window.removeEventListener('pointerdown', outside, true); window.removeEventListener('wheel', outside);
       window.removeEventListener('resize', onClose); window.visualViewport?.removeEventListener('resize', onClose);
     };
-  }, [onClose]);
+  }, [anchor, onClose]);
   return createPortal(<div ref={ref} tabIndex={-1} popover="manual" role="menu" aria-label={label} className={[stylex.props(styles.menu).className, 'session-menu'].join(' ')} onKeyDown={event => {
     const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
     const current = buttons.findIndex(button => button === document.activeElement);
