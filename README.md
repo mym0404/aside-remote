@@ -1155,7 +1155,7 @@ service alone leaves Aside and conversation data intact.
 | `/api/web-token` gives 401/403 without Access | Expected before manual login. Do not “fix” it by making the proxy pretend the request is localhost. |
 | Remote `/api/web-token` returns a token without login | Remove public access immediately. Fix Host/client rewriting, add the non-Access bootstrap block, and rotate the exposed token before reopening. |
 | Cookie/WebSocket auth fails behind a proxy | Preserve Host, `Authorization`, cookies, and `X-Forwarded-Proto: https`; trust only the actual proxy peer. Check `/ws` returns 101 after login. |
-| “Reconnecting…” or responses stop updating | Check WebSocket upgrade headers and idle timeouts. Exclude API/WS from caching; use the Nginx upgrade configuration above. Bridge heartbeat is 20 seconds. |
+| Connection activity indicator keeps spinning or responses stop updating | Check WebSocket upgrade headers and idle timeouts. Exclude API/WS from caching; use the Nginx upgrade configuration above. Bridge heartbeat is 20 seconds. |
 | Bridge reachable, Browser unavailable | Open Aside and the matching signed-in browser profile. Check account/path alignment and run an actual browser task; daemon health is insufficient. |
 | New conversation fails / wrong account's history | Verify `ASIDE_ACCOUNT`, `ASIDE_USER_DIR`, CLI authentication, and selected profile. Do not delete sessions or rotate the bridge token to repair a profile connection. |
 | A browser window closes or changes mode | Reopen the intended profile/window in Aside and retry. The bridge can repair some stale bindings, but cannot operate a profile that is unavailable. |
